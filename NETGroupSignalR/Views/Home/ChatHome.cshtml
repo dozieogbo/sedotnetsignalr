@@ -1,0 +1,37 @@
+﻿
+@{
+    ViewBag.Title = "ChatHome";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>ChatHome</h2>
+
+<p id="status">Disconnected</p>
+<form action="" method="post" id="name-form">
+    <input id="name" type="text" value="" class="form-control" />
+    <button type="button" class="btn btn-primary" id="submitBtn">Join</button>
+</form>
+
+@section scripts{
+    <script src="~/Scripts/jquery.signalR-2.2.2.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var conn = $.hubConnection();
+            var hub = conn.createHubProxy('chatHub');
+
+            conn.start(function () {
+                $('#status').text('Connected');
+            });
+
+            $('#submitBtn').click(function () {
+                var name = $('#name').val();
+
+                localStorage.setItem('name', name);
+
+                hub.invoke('join', name);
+
+                location.href = "/home/chat";
+            });
+        })
+    </script>
+}

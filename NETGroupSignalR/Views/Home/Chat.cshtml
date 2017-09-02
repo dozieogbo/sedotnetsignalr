@@ -1,0 +1,55 @@
+﻿
+@{
+    ViewBag.Title = "Chat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<p id="status">Disconnected</p>
+
+<ul id="joins">
+    <strong>Current online</strong>
+</ul>
+
+<ul id="messages">
+    <strong>Messages</strong>
+    <li><span>Demo message</span> by <span>Demo</span></li>
+</ul>
+
+<input type="text" value="" id="new-message" />
+
+<button id="send" class="btn btn-primary">Send</button>
+
+
+@section scripts{
+    <script src="~/Scripts/jquery.signalR-2.2.2.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var myName = localStorage.getItem('name');
+
+            var conn = $.hubConnection();
+            var hub = conn.createHubProxy('chatHub');
+
+            hub.on('userJoined', function (name) {
+                $('#joins').append('<li>' + name + '</li>')
+            });
+
+            hub.on('onReceiveMessage', function (name, message) {
+                $('#messages').append('<li><span>' + message + '</span>' + ' by <span>' + name + '</span></li>')
+            });
+
+            conn.start(function () {
+                $('#status').text('Connected');
+            });
+
+
+            $('#send').click(function () {
+                var message = $('#new-message').val();
+                $('#messages').append('<li><span>' + message + '</span>' + ' by <span>' + 'Me' + '</span></li>')
+                hub.invoke('sendMessage', myName, message);
+
+                $('#new-message').val('');
+            });
+        })
+        
+    </script>
+}
